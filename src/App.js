@@ -13,7 +13,7 @@ function App() {
     try {
       // Validate and submit the JSON input to the backend
       const parsedInput = JSON.parse(jsonInput);
-      const response = await axios.post('http://localhost:5000/bfhl', { data: parsedInput.data });
+      const response = await axios.post('https://backend-eight-delta-78.vercel.app/bfhl', { data: parsedInput.data });
       setResponseData(response.data);
     } catch (error) {
       alert('Invalid JSON or Server Error');
