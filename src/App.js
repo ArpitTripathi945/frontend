@@ -1,99 +1,126 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import './App.css'; // Optional for styling
+import React, { useState } from "react";
+import axios from "axios";
+import "./App.css"; // Import for styling
 
 function App() {
-    const [jsonInput, setJsonInput] = useState(''); // State for JSON input
-    const [response, setResponse] = useState(null); // State for API response
-    const [error, setError] = useState(''); // State for errors
-    const [isSubmitted, setIsSubmitted] = useState(false); // State to toggle visibility of checkboxes
-    const [selectedOptions, setSelectedOptions] = useState([]); // State for selected options
+  const [inputData, setInputData] = useState("");
+  const [responseData, setResponseData] = useState(null);
+  const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false); // For controlling filter visibility
+  const [availableFilters, setAvailableFilters] = useState(["alphabets", "numbers", "highest_lowercase"]); // Available filters
+  const [selectedFilters, setSelectedFilters] = useState([]); // Selected filters
 
-    // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        try {
-            const parsedJson = JSON.parse(jsonInput); // Validate JSON
-            const res = await axios.post('https://backend-eight-delta-78.vercel.app/bfhl', {data : parsedJson.data}); // Post data to backend
-            setResponse(res.data);
-            setIsSubmitted(true); // Show options if submission is successful
-        } catch (err) {
-            setError('Invalid JSON format or server error.');
-            setIsSubmitted(false); // Hide options if there is an error
-        }
-    };
+  // Handle Input Change
+  const handleInputChange = (e) => {
+    setInputData(e.target.value);
+  };
 
-    // Handle checkbox changes
-    const handleOptionChange = (e) => {
-        const { value } = e.target;
-        setSelectedOptions((prev) => 
-            prev.includes(value) ? prev.filter(opt => opt !== value) : [...prev, value]
-        );
-    };
+  // Handle Form Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const jsonData = JSON.parse(inputData); // Validate JSON
+      const response = await axios.post("https://backend-eight-delta-78.vercel.app/bfhl", { data: jsonData.data });
+      setResponseData(response.data);
+      setError(null);
+      setShowFilters(true); // Show filters after successful submission
+    } catch (err) {
+      setError("Invalid JSON or Server Error");
+      setResponseData(null);
+      setShowFilters(false); // Hide filters on error
+    }
+  };
 
-    // Render the filtered response based on selected checkboxes
-    const renderResponse = () => {
-        if (!response) return null;
-        return (
-            <div className="response-section">
-                {selectedOptions.includes('Alphabets') && <p>Alphabets: {response.alphabets.join(', ')}</p>}
-                {selectedOptions.includes('Numbers') && <p>Numbers: {response.numbers.join(', ')}</p>}
-                {selectedOptions.includes('Highest Lowercase Alphabet') && <p>Highest Lowercase Alphabet: {response.highest_lowercase_alphabet.join(', ')}</p>}
-            </div>
-        );
-    };
+  // Handle filter selection (move from available to selected)
+  const selectFilter = (filter) => {
+    setAvailableFilters(availableFilters.filter((item) => item !== filter));
+    setSelectedFilters([...selectedFilters, filter]);
+  };
+
+  // Handle removing a filter from selected filters
+  const removeFilter = (filter) => {
+    setSelectedFilters(selectedFilters.filter((item) => item !== filter));
+    setAvailableFilters([...availableFilters, filter]);
+  };
+
+  // Render Response based on Selected Filters
+  const renderResponse = () => {
+    if (!responseData) return null;
+
+    const result = {};
+    if (selectedFilters.includes("alphabets")) result["Alphabets"] = responseData.alphabets;
+    if (selectedFilters.includes("numbers")) result["Numbers"] = responseData.numbers;
+    if (selectedFilters.includes("highest_lowercase")) result["Highest LowerCase"] = responseData.highest_lowercase_alphabet;
 
     return (
-        <div className="App">
-            <h1>BFHL Challenge</h1>
-            <form onSubmit={handleSubmit}>
-                <textarea
-                    value={jsonInput}
-                    onChange={(e) => setJsonInput(e.target.value)}
-                    placeholder='Enter valid JSON input'
-                    rows={5}
-                    cols={50}
-                />
-                <br />
-                <button type='submit'>Submit</button>
-            </form>
+      <div className="response-block">
+        <h3>Response:</h3>
+        {Object.keys(result).length > 0 ? (
+          Object.keys(result).map((key) => (
+            <div key={key}>
+              <strong>{key}:</strong> {result[key].join(", ")}
+            </div>
+          ))
+        ) : (
+          <p>No filters selected.</p>
+        )}
+      </div>
+    );
+  };
 
-            {error && <p className="error">{error}</p>}
+  return (
+    <div className="App">
+      <div className="container">
+        <h1>BFHL Challenge</h1>
+        <form onSubmit={handleSubmit}>
+          <div className="input-section">
+            <label>Enter JSON:</label>
+            <textarea
+              rows="4"
+              value={inputData}
+              onChange={handleInputChange}
+              placeholder='{"data": ["A", "B", "1", "2"]}'
+            />
+          </div>
+          <button type="submit" className="submit-btn">Submit</button>
+        </form>
 
-            {isSubmitted && (
-                <div className="options-section">
-                    <h2>Select the options to display:</h2>
-                    <label>
-                        <input
-                            type="checkbox"
-                            value="Alphabets"
-                            onChange={handleOptionChange}
-                        />
-                        Alphabets
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            value="Numbers"
-                            onChange={handleOptionChange}
-                        />
-                        Numbers
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            value="Highest Lowercase Alphabet"
-                            onChange={handleOptionChange}
-                        />
-                        Highest Lowercase Alphabet
-                    </label>
-                </div>
-            )}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        {/* Filters visible only after valid JSON submission */}
+        {showFilters && (
+          <>
+            <div className="filters-section">
+              <div className="available-filters">
+                <h3>Available Filters:</h3>
+                {availableFilters.map((filter) => (
+                  <div key={filter} className="filter-block" onClick={() => selectFilter(filter)}>
+                    {filter.replace('_', ' ')}
+                  </div>
+                ))}
+              </div>
+
+              <div className="selected-filters">
+                <h3>Selected Filters:</h3>
+                {selectedFilters.length > 0 ? (
+                  selectedFilters.map((filter) => (
+                    <div key={filter} className="filter-block selected">
+                      {filter.replace('_', ' ')}
+                      <span className="remove-filter" onClick={() => removeFilter(filter)}>x</span>
+                    </div>
+                  ))
+                ) : (
+                  <p>No filters selected.</p>
+                )}
+              </div>
+            </div>
 
             {renderResponse()}
-        </div>
-    );
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default App;
