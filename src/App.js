@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css';
+import './App.css'; // Add any custom styles here
 
 function App() {
   const [jsonInput, setJsonInput] = useState('');
@@ -41,49 +41,70 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1>BFHL Challenge</h1>
+    <div className="container mt-5">
+      <h1 className="text-center mb-4">BFHL Challenge</h1>
 
-      <form onSubmit={handleSubmit}>
-        <textarea
-          rows="5"
-          placeholder='Enter JSON (e.g. { "data": ["A", "1", "B"] })'
-          value={jsonInput}
-          onChange={(e) => setJsonInput(e.target.value)}
-        />
-        <button type="submit">Submit</button>
+      <form onSubmit={handleSubmit} className="mb-4">
+        <div className="form-group">
+          <label htmlFor="jsonInput">Enter JSON Data:</label>
+          <textarea
+            className="form-control"
+            id="jsonInput"
+            rows="5"
+            placeholder='Enter JSON (example -> { "data": ["A", "1", "B"] })'
+            value={jsonInput}
+            onChange={(e) => setJsonInput(e.target.value)}
+          />
+        </div>
+        <h3 className="text-center mb-4"> </h3>
+        <button type="Submit" className="btn btn-primary btn-block">Submit</button>
       </form>
 
       {responseData && (
         <div>
           <h2>Select Data to Display:</h2>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                value="Numbers"
-                onChange={handleOptionChange}
-              /> Numbers
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              value="Numbers"
+              id="numbersCheck"
+              onChange={handleOptionChange}
+            />
+            <label className="form-check-label" htmlFor="numbersCheck">
+              Numbers
             </label>
-            <label>
-              <input
-                type="checkbox"
-                value="Alphabets"
-                onChange={handleOptionChange}
-              /> Alphabets
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              value="Alphabets"
+              id="alphabetsCheck"
+              onChange={handleOptionChange}
+            />
+            <label className="form-check-label" htmlFor="alphabetsCheck">
+              Alphabets
             </label>
-            <label>
-              <input
-                type="checkbox"
-                value="Highest Alphabet"
-                onChange={handleOptionChange}
-              /> Highest Alphabet
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              value="Highest Alphabet"
+              id="highestCheck"
+              onChange={handleOptionChange}
+            />
+            <label className="form-check-label" htmlFor="highestCheck">
+              Highest Alphabet
             </label>
           </div>
 
-          <div className="result">
+          <div className="mt-4">
             <h3>Result:</h3>
-            {renderResponse()}
+            <div className="p-3 border bg-light">
+              {renderResponse()}
+            </div>
           </div>
         </div>
       )}
@@ -92,4 +113,5 @@ function App() {
 }
 
 export default App;
+
 
