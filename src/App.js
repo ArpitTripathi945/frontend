@@ -11,7 +11,7 @@ function App() {
         e.preventDefault();
         try {
             const parsedJson = JSON.parse(jsonInput);
-            const res = await axios.post('https://backend-eight-delta-78.vercel.app/bfhl', parsedJson);
+            const res = await axios.post('https://backend-eight-delta-78.vercel.app/bfhl', {data: parsedJson.data});
             setResponse(res.data);
         } catch (err) {
             setError('Invalid JSON or server error');
